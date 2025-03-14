@@ -8,45 +8,42 @@ import (
 )
 
 func main() {
-	args := os.Args
-
-	targetWord := args[1]
-	textFiles := make([]string, len(args) - 2)	// 2: 실행파일(args[0]), targetWord(args[1])
-
-	for i := 2; i < len(args); i++ {
-		textFiles = append(textFiles, args[i])
+	if len(os.Args) < 2 {
+		fmt.Fprintln(os.Stderr, "Usage: searchWord <word> <file1> <file2> ...")
+		os.Exit(1)
 	}
 
-	fmt.Println(targetWord)
-	fmt.Println(textFiles)
+	targetWord := os.Args[1]
+	textFiles := os.Args[2:]
 
-
-	for _, fileName := range textFiles {
-		file, err := os.Open(fileName)
-		if err != nil {
-			fmt.Printf("[%s] doesn't open\n", fileName)
-			continue
+	for _, filename := range textFiles {
+		if err := searchInFile(filename, targetWord); err != nil {
+			fmt.Fprintln(os.Stderr, err)
 		}
-
-		defer func() {
-			if err := file.Close(); err != nil {
-				panic(fmt.Sprintf("[%s]file couldn't be closed", fileName))
-			}
-		}()
-
-		lineNum := 0
-		scanner := bufio.NewScanner(file)
-
-		fmt.Println(fileName)
-		fmt.Println("-----------------------------------")
-		
-		for scanner.Scan() {
-			line := scanner.Text()
-			lineNum++
-			if strings.Contains(line, targetWord) {
-				fmt.Printf("%d\t%s\n", lineNum, line)
-			}
-		}
-		fmt.Println("-----------------------------------")
 	}
+}
+
+func searchInFile(filename string, targetWord string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return fmt.Errorf("[%s] doesn't open: %v", filename, err)
+	}
+	defer file.Close()
+
+	lineNum := 0
+	scanner := bufio.NewScanner(file)
+
+	fmt.Println(filename)
+	fmt.Println("-----------------------------------")
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		lineNum++
+		if strings.Contains(line, targetWord) {
+			fmt.Printf("%d\t%s\n", lineNum, line)
+		}
+	}
+	fmt.Println("-----------------------------------")
+
+	return nil
 }
