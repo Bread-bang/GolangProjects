@@ -15,9 +15,12 @@ func main() {
 		fmt.Println("Usage: ./ping1.0v <Destination>")
 		return
 	}
+	// Target Address
 	target := os.Args[1]
 
+	var seqNum int = 1	// Sequence number는 이후 자동으로 증가
 	for {
+		// Message 만들기
 		icmpMessage := icmp.Message {
 			Type: ipv4.ICMPTypeEcho, // ICMPTypeEcho = 8
 			Code: 0,
@@ -28,7 +31,7 @@ func main() {
 			// Identifier, Seq Num, Payload(Data)는 icmp.Echo에 정의 되어 있음
 			Body: &icmp.Echo {
 				ID: os.Getpid() & 0xffff,	// ID는 주로 process id를 적는데, 16바이트로 맞추기 위해 0xffff로 자름
-				Seq: 1,
+				Seq: seqNum,
 				Data: []byte("FirstEcho"), 	// 패킷 손실이나 데이터 변조 여부를 확인하기 위한 문자열
 			},
 		}
@@ -39,7 +42,7 @@ func main() {
 			return
 		}
 
-		conn, err := net.Dial("ip4:icmp", target) // arg[0]의 protocol로 arg[1]로 connect 시도
+		conn, err := net.Dial("ip4:icmp", target) // arg[1]로 connect 시도
 		if err != nil {
 			fmt.Println("Dial error:", err)
 			return
@@ -79,6 +82,7 @@ func main() {
 			fmt.Printf("Unexpected response: %+v\n", parsedMessage)
 		}
 
+		seqNum++
 		time.Sleep(1 * time.Second)
 	}
 }
