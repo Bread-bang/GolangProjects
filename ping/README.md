@@ -39,6 +39,10 @@
 실행파일명 <목적지 IP...> -c [MESSAGE 개수]
 ```
 
+#### 👀 비고
+
+- min/avg/max/stddev 계산 추가
+
 ### v3.0
 
 > raw socket으로 단일 원격 주소와의 Ping 통신
